@@ -21,7 +21,7 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-app.post('/save-coordinates', (req, res) => {
+app.post('/api/save-coordinates', (req, res) => {
     const coordinates = req.body;
 
     const workbook = XLSX.utils.book_new();
