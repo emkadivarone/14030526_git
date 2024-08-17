@@ -15,14 +15,12 @@ const s3 = new AWS.S3({
 });
 
 app.use(bodyParser.json());
-app.use(express.static(__dirname));
+app.use(express.static(path.join(__dirname, 'public'))); // تغییر مسیر استاتیک به public
 
-// مسیر اصلی برای ارائه فایل HTML
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html'));
+    res.sendFile(path.join(__dirname, 'public', 'index.html')); // تغییر مسیر فایل HTML به public
 });
 
-// مسیر برای ذخیره داده‌ها در AWS S3
 app.post('/api/save-coordinates', (req, res) => {
     const coordinates = req.body;
     
@@ -34,7 +32,6 @@ app.post('/api/save-coordinates', (req, res) => {
     // تبدیل workbook به Buffer
     const buffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'buffer' });
 
-    // پارامترهای بارگذاری به S3
     const params = {
         Bucket: 'your-bucket-name',
         Key: 'a.xlsx',
@@ -42,7 +39,6 @@ app.post('/api/save-coordinates', (req, res) => {
         ContentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
     };
     
-    // بارگذاری فایل به AWS S3
     s3.upload(params, (err, data) => {
         if (err) {
             console.error('Error uploading data:', err);
