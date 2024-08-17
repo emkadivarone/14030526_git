@@ -1,42 +1,26 @@
-const express = require('express');
-const bodyParser = require('body-parser');
-const XLSX = require('xlsx');
-const fs = require('fs');
-const path = require('path');
-
-const app = express();
-const port = 3000;
-const filePath = path.join(__dirname, 'a.xlsx');
-
-app.use(bodyParser.json());
-app.use(express.static(__dirname));
-
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html'));
+const AWS = require('aws-sdk');
+const s3 = new AWS.S3({
+  accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+  region: process.env.AWS_REGION
 });
 
 app.post('/save-coordinates', (req, res) => {
-    const coordinates = req.body;
+  const coordinates = req.body;
 
-    if (fs.existsSync(filePath)) {
-        const workbook = XLSX.readFile(filePath);
-        const sheetName = workbook.SheetNames[0];
-        const ws = workbook.Sheets[sheetName];
+  const uploadParams = {
+    Bucket: 'your-bucket-name',
+    Key: 'a.xlsx',
+    Body: JSON.stringify(coordinates),
+    ContentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+  };
 
-        const existingData = XLSX.utils.sheet_to_json(ws);
-        const newData = existingData.concat(coordinates);
-
-        const newSheet = XLSX.utils.json_to_sheet(newData);
-        workbook.Sheets[sheetName] = newSheet;
-
-        XLSX.writeFile(workbook, filePath);
-
-        res.send('Coordinates saved to Excel file.');
+  s3.upload(uploadParams, (err, data) => {
+    if (err) {
+      console.error('Error uploading data: ', err);
+      res.status(500).send('Error saving file.');
     } else {
-        res.status(404).send('Excel file not found.');
+      res.send('File uploaded successfully.');
     }
-});
-
-app.listen(port, () => {
-    console.log(`Server running at http://localhost:${port}`);
+  });
 });
