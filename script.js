@@ -1,44 +1,18 @@
-const map = L.map('map').setView([37.26941, 49.2145], 13);
+document.getElementById('calculator-form').addEventListener('submit', function(event) {
+    event.preventDefault();
 
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '© OpenStreetMap contributors'
-}).addTo(map);
+    const number1 = parseFloat(document.getElementById('number1').value);
+    const number2 = parseFloat(document.getElementById('number2').value);
+    const sum = number1 + number2;
 
-let coordinates = [];
-
-map.on('click', function(e) {
-    const latlng = e.latlng;
-    coordinates.push({
-        latitude: latlng.lat,
-        longitude: latlng.lng
-    });
-    L.marker(latlng).addTo(map).bindPopup(`Latitude: ${latlng.lat.toFixed(5)}<br>Longitude: ${latlng.lng.toFixed(5)}`).openPopup();
-});
-
-function getCurrentDateTime() {
-    return new Date().toLocaleString();
-}
-
-function saveToServer() {
-    const timestamp = getCurrentDateTime();
-    const dataToSend = coordinates.map(coord => ({
-        ...coord,
-        timestamp: timestamp
-    }));
-
-    fetch('/api/save-coordinates', { // به روز رسانی مسیر API
+    fetch('/calculate', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify(dataToSend)
+        body: JSON.stringify({ number1, number2, sum })
     })
     .then(response => response.text())
-    .then(data => {
-        alert(data);
-        coordinates = [];
-    })
+    .then(data => alert(data))
     .catch(error => console.error('Error:', error));
-}
-
-document.getElementById('save-button').addEventListener('click', saveToServer);
+});
