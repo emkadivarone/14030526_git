@@ -26,7 +26,7 @@ function saveToServer() {
         timestamp: timestamp
     }));
 
-    fetch('/save-coordinates', {
+    fetch('/api/save-coordinates', { // به روز رسانی مسیر API
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
