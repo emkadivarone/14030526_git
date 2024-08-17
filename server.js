@@ -15,21 +15,19 @@ const s3 = new AWS.S3({
 });
 
 app.use(bodyParser.json());
-app.use(express.static(path.join(__dirname, 'public'))); // تغییر مسیر استاتیک به public
+app.use(express.static(path.join(__dirname))); // تغییر مسیر استاتیک
 
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html')); // تغییر مسیر فایل HTML به public
+    res.sendFile(path.join(__dirname, 'index.html'));
 });
 
 app.post('/api/save-coordinates', (req, res) => {
     const coordinates = req.body;
-    
-    // ایجاد یک workbook جدید با داده‌های دریافتی
+
     const workbook = XLSX.utils.book_new();
     const worksheet = XLSX.utils.json_to_sheet(coordinates);
     XLSX.utils.book_append_sheet(workbook, worksheet, 'Coordinates');
-    
-    // تبدیل workbook به Buffer
+
     const buffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'buffer' });
 
     const params = {
@@ -38,7 +36,7 @@ app.post('/api/save-coordinates', (req, res) => {
         Body: buffer,
         ContentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
     };
-    
+
     s3.upload(params, (err, data) => {
         if (err) {
             console.error('Error uploading data:', err);
