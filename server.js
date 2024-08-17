@@ -5,7 +5,7 @@ const XLSX = require('xlsx');
 const path = require('path');
 
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000;
 
 // پیکربندی AWS SDK
 const s3 = new AWS.S3({
@@ -15,7 +15,7 @@ const s3 = new AWS.S3({
 });
 
 app.use(bodyParser.json());
-app.use(express.static(path.join(__dirname))); // تغییر مسیر استاتیک
+app.use(express.static(path.join(__dirname))); // ارائه فایل‌های استاتیک
 
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
